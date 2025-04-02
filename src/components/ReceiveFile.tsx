@@ -21,7 +21,7 @@ const receiveCall = async (email: string) => {
     const data = await response.json();
     return data.files;
   } catch (err: any) {
-    throw new Error("Failed to fetch files");
+    throw new Error("No Files found!!");
   }
 };
 

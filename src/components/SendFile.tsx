@@ -78,13 +78,13 @@ function SendFile() {
 
         <input
           type="email"
-          name="email"
+          // name="email"
           placeholder="Enter recipient's email"
           className="w-full p-2 border rounded mb-4"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-          required
+          // pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+          // required
         />
 
         <div

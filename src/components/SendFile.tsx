@@ -78,7 +78,7 @@ function SendFile() {
 
         <input
           type="email"
-          // name="email"
+          name="email"
           placeholder="Enter recipient's email"
           className="w-full p-2 border rounded mb-4"
           value={email}

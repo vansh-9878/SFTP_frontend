@@ -1,46 +1,76 @@
-import React, { useState } from 'react';
-import { Download } from 'lucide-react';
+import React, { useState } from "react";
+import { Download } from "lucide-react";
+import toast from "react-hot-toast";
+
+const validateEmail = (email: string) => {
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+};
+
+const receiveCall = async (email: string) => {
+  try {
+    const response = await fetch("https://securesftp.onrender.com/receive", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      throw new Error("No files found for this email");
+    }
+
+    const data = await response.json();
+    return data.files;
+  } catch (err: any) {
+    throw new Error("Failed to fetch files");
+  }
+};
 
 function ReceiveFile() {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [files, setFiles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes('@')) {
-      setError('Please enter a valid email ID');
+    if (!validateEmail(email)) {
+      toast.error("Please Fill the details correctly...", {
+        style: {
+          border: "1px solid #713200",
+          padding: "16px",
+          color: "#713200",
+        },
+        iconTheme: {
+          primary: "#713200",
+          secondary: "#FFFAEE",
+        },
+      });
       return;
     }
-    setError('');
+    setError("");
     setLoading(true);
 
-    try {
-      const response = await fetch('http://localhost:8080/receive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error('No files found for this email');
-      }
-
-      const data = await response.json();
-      setFiles(data.files);
-    } catch (err: any) {
-      setError(err.message || 'Error fetching files');
-    } finally {
-      setLoading(false);
-    }
+    toast.promise(receiveCall(email), {
+      loading: "Connecting to the Server...",
+      success: (files) => {
+        setFiles(files);
+        setLoading(false);
+        return <b>Received Files Successfully!!</b>;
+      },
+      error: (err) => {
+        setLoading(false);
+        return <b>{err.message || "No Files Found!!"}</b>;
+      },
+    });
+    setFiles([]);
+    setEmail("");
   };
 
   // 📌 Function to download the selected file
   const handleDownload = (fileName: string) => {
-    const downloadUrl = `http://localhost:8080/download/${email}/${fileName}`;
-    
-    const a = document.createElement('a');
+    const downloadUrl = `https://securesftp.onrender.com/download/${email}/${fileName}`;
+
+    const a = document.createElement("a");
     a.href = downloadUrl;
     a.download = fileName; // Set the filename
     document.body.appendChild(a);
@@ -51,11 +81,16 @@ function ReceiveFile() {
   return (
     <div className="max-w-xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Receive a File</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Receive a File
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Enter Email ID
             </label>
             <div className="mt-1">
@@ -64,7 +99,7 @@ function ReceiveFile() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm h-10 pl-2"
                 placeholder="Enter your Email ID"
               />
             </div>
@@ -77,7 +112,7 @@ function ReceiveFile() {
             disabled={loading}
           >
             <Download className="h-5 w-5 mr-2" />
-            {loading ? 'Fetching...' : 'Receive File'}
+            {loading ? "Fetching..." : "Receive File"}
           </button>
         </form>
 
@@ -86,7 +121,10 @@ function ReceiveFile() {
             <h3 className="text-lg font-semibold">Available Files:</h3>
             <ul className="mt-2 space-y-2">
               {files.map((file, index) => (
-                <li key={index} className="flex justify-between items-center border p-2 rounded-lg shadow-sm">
+                <li
+                  key={index}
+                  className="flex justify-between items-center border p-2 rounded-lg shadow-sm"
+                >
                   <span className="break-all">{file}</span>
                   <button
                     onClick={() => handleDownload(file)}

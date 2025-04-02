@@ -63,7 +63,6 @@ function ReceiveFile() {
       },
     });
     setFiles([]);
-    setEmail("");
   };
 
   // 📌 Function to download the selected file
@@ -76,6 +75,7 @@ function ReceiveFile() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+    setEmail("");
   };
 
   return (
